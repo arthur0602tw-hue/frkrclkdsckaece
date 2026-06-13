@@ -91,7 +91,7 @@
                 isCover: true,
                 title: "Dear Priya",
                 desc: "好多話來不及跟妳說<br>所以我把想跟妳說的話都放在這裡了",
-                avatar: "DSC09949.JPG",
+                avatar: "IMG_6766 2.JPG",
                 hint: "點擊帥哥進入",
                 bg: "IMG_4245.JPG"
             },
@@ -101,7 +101,7 @@
                 icons: ["💩", "💩", "💩"],
                 hint: "踩完所有的牛糞進入下一頁",
                 effectType: "squish",
-                bg: "IMG_4245.jpg"
+                bg: "IMG_4245.JPG"
             },
             {
                 // 第三面 (第二關) - 雪球砸碎關卡
@@ -109,7 +109,7 @@
                 icons: ["❄️", "❄️", "❄️"],
                 hint: "丟三顆雪球進入下一頁",
                 effectType: "snowball",
-                bg: "IMG_5789.jpg"
+                bg: "IMG_5789.JPG"
             },
             {
                 // 第四面 (第三關) - 喜歡妳的點點滴滴
@@ -117,7 +117,7 @@
                 icons: ["🎈", "🎈", "🎈"],
                 hint: "點擊這三個充滿喜歡的小氣泡",
                 effectType: "pop",
-                bg: "fqs 2026-01-14 163950.641.jpg"
+                bg: "fqs 2026-01-14 163950.641.JPG"
             },
             {
                 // 第五面 (最後的封底) - 溫柔珍重的信封與手寫信 (背景圖更新為 IMG_5437.jpg)
@@ -126,7 +126,7 @@
                 icons: ["💌", "💌", "💌"],
                 hint: "拆開最後三個信封",
                 effectType: "openEnvelope",
-                bg: "IMG_5437.jpg"
+                bg: "IMG_5437.JPG"
             }
         ];
 
@@ -139,7 +139,7 @@
         function updateBackground(state) {
             const bgImg = document.getElementById('bg-image');
             const bgOverlay = document.getElementById('bg-overlay');
-            const currentBg = stageData[currentStage].bg || "IMG_4245.jpg";
+            const currentBg = stageData[currentStage].bg || "IMG_4245.JPG";
             
             if (state === 'cover') {
                 if (bgImg) {
