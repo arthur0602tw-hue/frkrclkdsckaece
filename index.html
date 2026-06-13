@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>給普里雅</title>
+    <title>藍天與微風的終點站 - 我們的非正式告別</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -146,7 +146,7 @@
     <script>
         // --- 狀態管理 ---
         let currentStage = 0;
-        let stageProgress = [false, false, false]; // 用於追蹤每頁3個Icon的點擊狀況
+        let stageProgress = []; // 修改：改為動態陣列，不再寫死 [false, false, false]
 
         // --- 全站關卡與情感文案資料集 ---
         const stageData = [
@@ -244,7 +244,8 @@
             const bottomFooter = document.getElementById('bottom-footer');
             const card = document.getElementById('game-card');
 
-            stageProgress = [false, false, false];
+            // 修改：根據這關 icons 陣列的實際長度，動態建立點擊進度追蹤
+            stageProgress = data.icons ? Array(data.icons.length).fill(false) : [];
 
             updateBackground(currentStage === 0 ? 'cover' : 'clear');
             card.classList.add('opacity-0', 'translate-y-8');
@@ -363,6 +364,7 @@
                 element.className = "w-16 h-16 rounded-full bg-sky-50 border border-sky-100 shadow-inner flex items-center justify-center text-3xl transition duration-300 transform scale-100 opacity-90 select-none pointer-events-none";
             }
 
+            // 動態檢查：只要該頁所有的 icon 都被標記為 true，就直接自動翻頁
             if (stageProgress.every(status => status === true)) {
                 if (currentStage === stageData.length - 1) {
                     setTimeout(() => {
