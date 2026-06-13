@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>藍天與微風的終點站 - 我們的非正式告別</title>
+    <title>給普里雅</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -107,7 +107,7 @@
 
     <!-- 全螢幕背景圖片與中性遮罩 -->
     <div class="fixed inset-0 z-0 overflow-hidden">
-        <img id="bg-image" src="IMG_4245.jpg" alt="Memory Background" class="w-full h-full object-cover filter brightness-75 scale-105 opacity-0" onerror="handleBgError(this)">
+        <img id="bg-image" src="IMG_4245.JPG" alt="Memory Background" class="w-full h-full object-cover filter brightness-75 scale-105 opacity-0" onerror="handleBgError(this)">
         <!-- 遮罩層：第一頁是明亮舒服的天空藍漸層，故事開啟後變為無藍色、純中性的微暗遮罩 (1.5秒漸變) -->
         <div id="bg-overlay" class="absolute inset-0 bg-gradient-to-b from-sky-200/50 via-sky-300/60 to-sky-400/80 transition-all duration-[1500ms] ease-out"></div>
     </div>
@@ -155,25 +155,25 @@
                 isCover: true,
                 title: "Dear Priya",
                 desc: "好多話來不及跟妳說<br>所以我把想跟妳說的話都放在這裡了",
-                avatar: "DSC09949.jpg",
+                avatar: "IMG_6766 2.JPG",
                 hint: "點擊帥哥進入",
-                bg: "IMG_4245.jpg"
+                bg: "IMG_4245.JPG"
             },
             {
                 // 第二面 (第一關) - 聖誕帽大便關卡
                 text: "謝謝妳那天鼓起勇氣約我出來，還做了聖誕帽送我。我知道因為之前的經驗，導致妳對感情很謹慎，但即使這樣，妳依舊無所畏懼的去認識我。謝謝妳踏出了那一步，讓我們認識了彼此，也讓我有自信去喜歡一個人。",
                 icons: ["💩", "💩", "💩"],
-                hint: "踩完所有的牛糞進入下一頁",
+                hint: "踩完三坨牛糞進入下一頁",
                 effectType: "squish",
-                bg: "IMG_4245.jpg"
+                bg: "IMG_4245.JPG"
             },
             {
                 // 第三面 (第二關) - 雪球砸碎關卡
                 text: "謝謝妳帶給了我很大的勇氣，讓我體驗了很多根本沒想過我會做的事。記得那次出發前，我很沒自信我可以開車開那麼遠，甚至出發前一天還想要改行程。結果隔天跟妳見面後，給了我要很多的安心感跟信心，突然有種「有妳在沒什麼好怕的感覺」。",
                 icons: ["❄️", "❄️", "❄️"],
-                hint: "丟三顆雪球進入下一頁",
+                hint: "砸三顆雪球進入下一頁",
                 effectType: "snowball",
-                bg: "IMG_5789.jpg"
+                bg: "IMG_5789.JPG"
             },
             {
                 // 第四面 (第三關) - 喜歡妳的點點滴滴 (手掌與擊掌提示更新)
@@ -181,7 +181,7 @@
                 icons: ["🖐️", "🖐️", "🖐️"],
                 hint: "流手汗了擊個掌吧！",
                 effectType: "highfive",
-                bg: "fqs 2026-01-14 163950.641.jpg"
+                bg: "fqs 2026-01-14 163950.641.JPG"
             },
             {
                 // 第五面 (最後的封底) - 溫柔珍重的信封與手寫信 (背景圖為合照，已移除告別按鈕)
@@ -190,7 +190,7 @@
                 icons: ["💌", "💌", "💌"],
                 hint: "拆開最後三個信封",
                 effectType: "openEnvelope",
-                bg: "IMG_5437.jpg"
+                bg: "IMG_5437.JPG"
             }
         ];
 
@@ -203,7 +203,7 @@
         function updateBackground(state) {
             const bgImg = document.getElementById('bg-image');
             const bgOverlay = document.getElementById('bg-overlay');
-            const currentBg = stageData[currentStage].bg || "IMG_4245.jpg";
+            const currentBg = stageData[currentStage].bg || "IMG_4245.JPG";
             
             if (state === 'cover') {
                 if (bgImg) {
