@@ -49,7 +49,7 @@
             img.style.display = 'none';
         }
 
-        // 全域定義灑花彩帶效果，避免 ES Module 載入時序或作用域導致的 ReferenceError
+        // 全域定義灑花彩帶效果，避免載入時序或作用域導致的 ReferenceError
         function finalConfetti() {
             const canvas = document.getElementById('confetti-canvas');
             if (!canvas) return;
@@ -105,21 +105,15 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between overflow-x-hidden relative p-4 md:p-6 text-slate-100">
 
-    <!-- 全螢幕背景圖片與微風藍遮罩 (漸變時間拉長至 1.5秒) -->
+    <!-- 全螢幕背景圖片與中性遮罩 -->
     <div class="fixed inset-0 z-0 overflow-hidden">
         <img id="bg-image" src="IMG_4245.jpg" alt="Memory Background" class="w-full h-full object-cover filter brightness-75 scale-105 opacity-0" onerror="handleBgError(this)">
         <!-- 遮罩層：第一頁是明亮舒服的天空藍漸層，故事開啟後變為無藍色、純中性的微暗遮罩 (1.5秒漸變) -->
         <div id="bg-overlay" class="absolute inset-0 bg-gradient-to-b from-sky-200/50 via-sky-300/60 to-sky-400/80 transition-all duration-[1500ms] ease-out"></div>
     </div>
 
-    <!-- 頂部進度條與控制列 (增加 fade-in 慢速動畫) -->
-    <header id="top-header" class="w-full max-w-xl mx-auto mb-4 z-20 flex flex-col space-y-2 transition-opacity duration-[2000ms] opacity-0">
-        <div class="flex items-center justify-end">
-            <!-- 音效開關 -->
-            <button onclick="toggleMute()" id="mute-btn" class="w-10 h-10 rounded-full bg-white/90 hover:bg-white text-sky-600 flex items-center justify-center transition shadow-md border border-white/50" title="開關音效">
-                <i data-lucide="volume-2" class="w-5 h-5"></i>
-            </button>
-        </div>
+    <!-- 頂部進度條與控制列 -->
+    <header id="top-header" class="w-full max-w-xl mx-auto mb-4 z-20 transition-opacity duration-[2000ms] opacity-0">
         <!-- 進度條條身 -->
         <div class="w-full bg-sky-200/40 h-3 rounded-full overflow-hidden shadow-inner backdrop-blur-sm">
             <div id="progress-bar" class="bg-sky-400 h-full transition-all duration-500 shadow-lg" style="width: 10%;"></div>
@@ -148,97 +142,16 @@
     <!-- 全螢幕亮片 Canvas -->
     <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
 
-    <!-- 密碼驗證彈出視窗 (後台安全鎖) -->
-    <div id="password-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden transition-all duration-300">
-        <div class="bg-white/95 p-6 rounded-3xl w-full max-w-sm border border-white/50 text-slate-800 shadow-2xl text-center space-y-4">
-            <h3 class="text-xl font-black text-sky-600">進入微風留言後台</h3>
-            <p class="text-xs text-slate-500">請輸入承志專屬密碼解鎖</p>
-            <input type="password" id="admin-password-input" placeholder="請輸入密碼..." class="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-center text-lg focus:outline-none focus:border-sky-500 font-mono tracking-widest">
-            <div class="flex space-x-3">
-                <button onclick="closePasswordModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm transition">取消</button>
-                <button onclick="verifyAdminPassword()" class="flex-1 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-sm transition">解鎖</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 管理員留言板後台頁面 (磨砂玻璃透明風格) -->
-    <div id="admin-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md hidden transition-all duration-300">
-        <div class="bg-white/95 p-6 rounded-3xl w-full max-w-xl border border-white/50 text-slate-800 shadow-2xl flex flex-col max-h-[85vh]">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
-                <h3 class="text-xl font-black text-slate-800 flex items-center gap-2">
-                    <span>承志的留言接收後台</span>
-                    <span id="db-status-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-600 font-extrabold">雲端同步中</span>
-                </h3>
-                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 transition">
-                    <i data-lucide="x" class="w-6 h-6"></i>
-                </button>
-            </div>
-            <!-- 留言列表 -->
-            <div id="messages-list-container" class="flex-1 overflow-y-auto py-4 space-y-4 min-h-[250px]">
-                <!-- 動態注入留言 -->
-            </div>
-        </div>
-    </div>
-
-    <!-- 自訂 Toast 提示框 -->
-    <div id="custom-toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900/90 text-white px-5 py-3 rounded-2xl shadow-xl transition-all duration-300 opacity-0 translate-y-4 pointer-events-none text-xs md:text-sm font-bold flex items-center gap-2">
-        <span id="toast-text"></span>
-    </div>
-
-    <!-- Firebase SDK 引入 (模組模組化版本) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, collection, addDoc, getDocs, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+    <!-- JavaScript 核心邏輯 -->
+    <script>
         // --- 狀態管理 ---
         let currentStage = 0;
-        let stageProgress = [false, false, false]; 
-        let db = null;
-        let auth = null;
-        let useFirebase = false;
-        let isMuted = false;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'farewell-journey-priya';
-
-        // --- 初始化 Firebase 及資料庫 (Rule 1 & Rule 3 規範) ---
-        async function initStorage() {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                try {
-                    const firebaseConfig = JSON.parse(__firebase_config);
-                    const app = initializeApp(firebaseConfig);
-                    auth = getAuth(app);
-                    db = getFirestore(app);
-
-                    // 優先使用自訂 Token 登入，其次匿名登入 (Rule 3)
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                    useFirebase = true;
-                    document.getElementById('db-status-badge').innerText = "雲端同步中";
-                    document.getElementById('db-status-badge').className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-600 font-extrabold";
-                    listenToMessages();
-                } catch (e) {
-                    console.error("Firebase init failed, falling back to LocalStorage:", e);
-                    setupLocalFallback();
-                }
-            } else {
-                console.log("No Firebase config available, using LocalStorage fallback.");
-                setupLocalFallback();
-            }
-        }
-
-        function setupLocalFallback() {
-            useFirebase = false;
-            document.getElementById('db-status-badge').innerText = "本機離線快取";
-            document.getElementById('db-status-badge').className = "text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-600 font-extrabold";
-            renderLocalMessages();
-        }
+        let stageProgress = [false, false, false]; // 用於追蹤每頁3個Icon的點擊狀況
 
         // --- 全站關卡與情感文案資料集 ---
         const stageData = [
             {
+                // 第一面：封面頁
                 isCover: true,
                 title: "Dear Priya",
                 desc: "好多話來不及跟妳說<br>所以我把想跟妳說的話都放在這裡了",
@@ -247,6 +160,7 @@
                 bg: "IMG_4245.jpg"
             },
             {
+                // 第二面 (第一關) - 聖誕帽大便關卡
                 text: "謝謝妳那天鼓起勇氣約我出來，還做了聖誕帽送我。我知道因為之前的經驗，導致妳對感情很謹慎，但即使這樣，妳依舊無所畏懼的去認識我。謝謝妳踏出了那一步，讓我們認識了彼此，也讓我有自信去喜歡一個人。",
                 icons: ["💩", "💩", "💩"],
                 hint: "踩完所有的牛糞進入下一頁",
@@ -254,6 +168,7 @@
                 bg: "IMG_4245.jpg"
             },
             {
+                // 第三面 (第二關) - 雪球砸碎關卡
                 text: "謝謝妳帶給了我很大的勇氣，讓我體驗了很多根本沒想過我會做的事。記得那次出發前，我很沒自信我可以開車開那麼遠，甚至出發前一天還想要改行程。結果隔天跟妳見面後，給了我要很多的安心感跟信心，突然有種「有妳在沒什麼好怕的感覺」。",
                 icons: ["❄️", "❄️", "❄️"],
                 hint: "丟三顆雪球進入下一頁",
@@ -261,13 +176,15 @@
                 bg: "IMG_5789.jpg"
             },
             {
+                // 第四面 (第三關) - 喜歡妳的點點滴滴 (手掌與擊掌提示更新)
                 text: "我很喜歡妳，我喜歡妳的勇敢，喜歡妳的怪。喜歡妳的獨立，喜歡妳的善良。喜歡妳跟我一樣不善於拒絕、總是以和為貴。喜歡妳懂我的幽默，會跟我一起講幹話。喜歡妳總是知道我在想什麼，一眼就發現我心情不好。",
-                icons: ["🎈", "🎈", "🎈"],
-                hint: "點擊這三個充滿喜歡的小氣泡",
-                effectType: "pop",
+                icons: ["🖐️", "🖐️", "🖐️"],
+                hint: "流手汗了擊個掌吧！",
+                effectType: "highfive",
                 bg: "fqs 2026-01-14 163950.641.jpg"
             },
             {
+                // 第五面 (最後的封底) - 溫柔珍重的信封與手寫信 (背景圖為合照，已移除告別按鈕)
                 isFinal: true,
                 text: "我依然很珍惜這份喜歡。但我知道，是時候把它留在這段回憶裡了。<br>收下我的信吧！",
                 icons: ["💌", "💌", "💌"],
@@ -277,7 +194,12 @@
             }
         ];
 
-        // --- 電影級背景切換機制 ---
+        // --- 渲染自訂 Icon ---
+        function renderIcon(icon) {
+            return icon; 
+        }
+
+        // --- 電影級背景切換與大氣過渡機制 ---
         function updateBackground(state) {
             const bgImg = document.getElementById('bg-image');
             const bgOverlay = document.getElementById('bg-overlay');
@@ -313,7 +235,7 @@
             }
         }
 
-        // --- 核心渲染機制 (1.5秒背景獨佔與超慢速漸變) ---
+        // --- 核心渲染機制 (包含 1.5 秒背景獨佔與緩慢淡入) ---
         function renderStage() {
             const data = stageData[currentStage];
             const container = document.getElementById('stage-content');
@@ -353,6 +275,7 @@
                             <h2 class="text-4xl md:text-5xl font-black text-slate-800 tracking-tight leading-tight">${data.title}</h2>
                             <p class="text-base md:text-lg text-slate-500 leading-relaxed max-w-sm mx-auto font-semibold">${data.desc}</p>
                         </div>
+                        
                         <div class="flex-1 w-full flex flex-col items-center justify-center space-y-4">
                             <div id="plane-btn" onclick="triggerPlane()" class="w-40 h-40 bg-sky-100 rounded-full flex items-center justify-center shadow-xl shadow-sky-200/60 cursor-pointer hover:bg-sky-200 transition-all duration-300 transform hover:scale-105 active:scale-95 shake-hover overflow-hidden border-4 border-white relative">
                                 <img src="${data.avatar}" alt="Handsome Boy" class="w-full h-full object-cover z-10 relative" onerror="handleAvatarError(this)">
@@ -364,20 +287,20 @@
                         </div>
                     `;
                 } else if (data.isFinal) {
-                    // 第五面最後的信
+                    // 第五面最後的信 (已移除揮手告別按鈕，改為信件展開時自動觸發 finalConfetti)
                     container.innerHTML = `
                         <div id="final-card-wrapper" class="w-full flex flex-col items-center justify-center text-center space-y-6">
                             <p class="text-lg md:text-xl text-slate-700 leading-relaxed font-bold tracking-wide text-center">${data.text}</p>
                             <div id="icon-group" class="flex justify-center space-x-6 py-4">
                                 ${data.icons.map((icon, idx) => `
                                     <button onclick="clickStoryIcon(this, ${idx}, '${data.effectType}')" class="w-16 h-16 rounded-full bg-sky-50 hover:bg-sky-100 border border-sky-200 shadow-md flex items-center justify-center text-3xl transition duration-300 transform hover:scale-110 active:scale-90 select-none">
-                                        ${icon}
+                                        ${renderIcon(icon)}
                                     </button>
                                 `).join('')}
                             </div>
                             <p id="icon-hint" class="text-sm md:text-base text-sky-500 font-extrabold animate-pulse tracking-wide">${data.hint}</p>
                             
-                            <!-- 點擊拆閱信件後徐徐展開的信紙，底下包含了留言輸入框與安全送出按鈕 -->
+                            <!-- 點擊拆閱信件後徐徐展開的信紙 -->
                             <div id="letter-content" class="hidden bg-slate-50 border border-slate-100 rounded-2xl p-6 text-base md:text-lg text-slate-750 leading-relaxed text-left space-y-5 shadow-inner max-h-[360px] overflow-y-auto w-full transition-all duration-500 transform translate-y-4 opacity-0">
                                 <p class="font-bold text-sky-600 text-lg md:text-xl">Dear Priya：</p>
                                 
@@ -389,36 +312,19 @@
                                 
                                 <p>謝謝妳出現在我的生命裡，雖然我們沒有走到最後，但這段回憶對我來說依然很珍貴。<br>我會好好的跟這段回憶道別，跟妳道別。<br>祝妳可以永遠幸福。</p>
                                 
-                                <p class="text-right font-bold text-sky-600 mt-5 cursor-pointer select-none" onclick="handleSignatureClick()">by 柯承志 ✨</p>
-                                
-                                <!-- 自定義回覆留言板 (安全功能，取代原先直接告別按鈕) -->
-                                <div id="reply-section" class="mt-6 pt-5 border-t border-slate-200 space-y-3">
-                                    <p class="font-bold text-slate-800 text-sm md:text-base">寫下妳的回覆：</p>
-                                    <textarea id="reply-textarea" rows="3" placeholder="在這裡寫下妳想說的話..." class="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm md:text-base text-slate-800 focus:outline-none focus:border-sky-500 transition-all resize-none shadow-sm"></textarea>
-                                    <div class="flex justify-between items-center pt-1">
-                                        <span class="text-[11px] text-slate-400">留言將會安全且匿名地送達承志 ✉️</span>
-                                        <button onclick="submitMessage()" class="bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 text-white text-xs md:text-sm font-black px-5 py-2.5 rounded-xl shadow-md transition transform active:scale-95 flex items-center space-x-1.5">
-                                            <span>送出留言</span>
-                                            <i data-lucide="send" class="w-3.5 h-3.5"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div id="reply-sent-status" class="hidden mt-6 pt-5 border-t border-slate-200 text-center space-y-3">
-                                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-50 text-emerald-500 border border-emerald-100 text-2xl animate-pulse">✨</div>
-                                    <p class="font-black text-emerald-600 text-sm md:text-base">留言已成功送達</p>
-                                    <p class="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">謝謝妳。願我們的記憶停留在最美好的瞬間，也祝我們未來的日子裡一切都好。</p>
-                                </div>
+                                <p class="text-right font-bold text-sky-600 mt-5">by 柯承志 ✨</p>
                             </div>
                         </div>
                     `;
                 } else {
+                    // 故事頁模板
                     container.innerHTML = `
                         <div class="w-full flex flex-col items-center justify-center text-center space-y-8 py-4">
                             <p class="text-lg md:text-xl text-slate-700 leading-relaxed font-bold tracking-wide text-center">${data.text}</p>
                             <div class="flex justify-center space-x-6 py-2">
                                 ${data.icons.map((icon, idx) => `
                                     <button onclick="clickStoryIcon(this, ${idx}, '${data.effectType}')" class="w-16 h-16 rounded-full bg-sky-50 hover:bg-sky-100 border border-sky-200 shadow-md flex items-center justify-center text-3xl transition duration-300 transform hover:scale-110 active:scale-90 select-none">
-                                        ${icon}
+                                        ${renderIcon(icon)}
                                     </button>
                                 `).join('')}
                             </div>
@@ -445,6 +351,10 @@
             } else if (effectType === 'snowball') {
                 element.innerHTML = "💨";
                 element.className = "w-16 h-16 rounded-full bg-sky-50/50 border border-sky-100 shadow-inner flex items-center justify-center text-3xl transition duration-300 transform scale-125 opacity-0 select-none pointer-events-none";
+            } else if (effectType === 'highfive') {
+                // 擊掌效果：形變為閃亮愛心 💖，代表默契溫度
+                element.innerHTML = "💖";
+                element.className = "w-16 h-16 rounded-full bg-rose-50 border border-rose-100 shadow-inner flex items-center justify-center text-3xl transition duration-300 transform scale-110 rotate-12 opacity-95 select-none pointer-events-none animate-pulse";
             } else if (effectType === 'pop') {
                 element.innerHTML = "💥";
                 element.className = "w-16 h-16 rounded-full bg-rose-50 border border-rose-200 shadow-inner flex items-center justify-center text-3xl transition duration-300 transform scale-50 opacity-0 select-none pointer-events-none";
@@ -468,6 +378,7 @@
                             setTimeout(() => {
                                 letter.classList.remove('translate-y-4', 'opacity-0');
                                 letter.classList.add('translate-y-0', 'opacity-100');
+                                finalConfetti(); // 展開長信時自動觸發灑花彩帶雨效果
                             }, 50);
                         }
                     }, 800);
@@ -479,215 +390,7 @@
             }
         }
 
-        // --- 點擊送出留言功能 ---
-        async function submitMessage() {
-            const replyTextarea = document.getElementById('reply-textarea');
-            const text = replyTextarea.value.trim();
-            
-            if (!text) {
-                showToast("請輸入一些字再送出唷 ❄️");
-                return;
-            }
-
-            const timestamp = new Date().toISOString();
-
-            try {
-                if (useFirebase && db) {
-                    // 寫入 Firebase (遵循 Rule 1 的指定嚴格路徑規範)
-                    const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
-                    await addDoc(collectionRef, {
-                        text: text,
-                        timestamp: timestamp
-                    });
-                } else {
-                    // 本地 localStorage 離線快取備份
-                    const localMsgs = JSON.parse(localStorage.getItem('farewell_msgs') || '[]');
-                    localMsgs.push({ text: text, timestamp: timestamp, id: 'local_' + Date.now() });
-                    localStorage.setItem('farewell_msgs', JSON.stringify(localMsgs));
-                }
-
-                // 隱藏輸入區，優雅地顯現成功提示
-                document.getElementById('reply-section').classList.add('hidden');
-                document.getElementById('reply-sent-status').classList.remove('hidden');
-
-                // 送出後撒滿天亮彩碎紙，浪漫道別
-                finalConfetti();
-                showToast("留言成功送達承志的手中囉 ✉️");
-            } catch (err) {
-                console.error("Message submission failed:", err);
-                showToast("發送失敗，請再試一次！");
-            }
-        }
-
-        // --- 點擊署名 5 次開啟密碼驗證 (Easter Egg) ---
-        let sigClicks = 0;
-        function handleSignatureClick() {
-            sigClicks++;
-            if (sigClicks >= 5) {
-                sigClicks = 0;
-                openPasswordModal();
-            }
-        }
-
-        function openPasswordModal() {
-            document.getElementById('password-modal').classList.remove('hidden');
-            document.getElementById('admin-password-input').focus();
-        }
-
-        function closePasswordModal() {
-            document.getElementById('password-modal').classList.add('hidden');
-            document.getElementById('admin-password-input').value = '';
-        }
-
-        function verifyAdminPassword() {
-            const val = document.getElementById('admin-password-input').value;
-            if (val === '0949') { // 取自 DSC09949 的時空密碼
-                closePasswordModal();
-                openAdminModal();
-                showToast("解鎖成功，進入接收後台 🔓");
-            } else {
-                showToast("密碼錯誤，請再試一次 🔒");
-                document.getElementById('admin-password-input').value = '';
-            }
-        }
-
-        // --- 後台管理員彈跳視窗 (Rule 2 規範：全本機端進行排序/篩選) ---
-        function openAdminModal() {
-            document.getElementById('admin-modal').classList.remove('hidden');
-            loadAndRenderMessages();
-        }
-
-        function closeAdminModal() {
-            document.getElementById('admin-modal').classList.add('hidden');
-        }
-
-        // 載入與排序留言
-        async function loadAndRenderMessages() {
-            const container = document.getElementById('messages-list-container');
-            container.innerHTML = `<div class="text-center py-8 text-slate-400 font-medium">讀取留言中...</div>`;
-
-            let messages = [];
-
-            try {
-                if (useFirebase && db) {
-                    // Rule 2: 絕不進行複雜的 orderBy, 獲取所有資料並在記憶體內排序
-                    const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
-                    const snapshot = await getDocs(collectionRef);
-                    snapshot.forEach(docSnap => {
-                        messages.push({ id: docSnap.id, ...docSnap.data() });
-                    });
-                } else {
-                    messages = JSON.parse(localStorage.getItem('farewell_msgs') || '[]');
-                }
-
-                // 記憶體端依時間排序 (新留言在最上層) (Rule 2 實踐)
-                messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                renderMessagesList(messages);
-            } catch (err) {
-                console.error("Fetch failed:", err);
-                container.innerHTML = `<div class="text-center py-8 text-rose-500 font-bold">載入失敗，請確認網路！</div>`;
-            }
-        }
-
-        // 即時監聽雲端更新 (若為雲端模式)
-        function listenToMessages() {
-            if (!useFirebase || !db) return;
-            const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
-            onSnapshot(collectionRef, (snapshot) => {
-                const messages = [];
-                snapshot.forEach(docSnap => {
-                    messages.push({ id: docSnap.id, ...docSnap.data() });
-                });
-                // 記憶體排序
-                messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                if (!document.getElementById('admin-modal').classList.contains('hidden')) {
-                    renderMessagesList(messages);
-                }
-            }, (error) => {
-                console.error("Listening failed:", error);
-            });
-        }
-
-        function renderLocalMessages() {
-            const messages = JSON.parse(localStorage.getItem('farewell_msgs') || '[]');
-            messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            renderMessagesList(messages);
-        }
-
-        function renderMessagesList(messages) {
-            const container = document.getElementById('messages-list-container');
-            if (messages.length === 0) {
-                container.innerHTML = `<div class="text-center py-12 text-slate-400 font-bold text-sm">目前還沒有收到 Priya 的任何留言唷... ✉️</div>`;
-                return;
-            }
-
-            container.innerHTML = messages.map(msg => {
-                const dateStr = new Date(msg.timestamp).toLocaleString('zh-TW', { hour12: false });
-                return `
-                    <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl relative group transition hover:shadow-sm">
-                        <div class="text-xs text-sky-500 font-black mb-1.5">${dateStr}</div>
-                        <p class="text-sm text-slate-700 leading-relaxed font-bold break-words whitespace-pre-wrap pr-10">${escapeHtml(msg.text)}</p>
-                        <!-- 刪除按鈕 -->
-                        <button onclick="deleteMessage('${msg.id}')" class="absolute top-4 right-4 text-slate-300 hover:text-rose-500 transition-colors" title="刪除這條留言">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                `;
-            }).join('');
-            lucide.createIcons();
-        }
-
-        // 刪除留言功能
-        async function deleteMessage(id) {
-            if (!confirm("確定要徹底刪除這條留言嗎？")) return;
-
-            try {
-                if (useFirebase && db && !id.startsWith('local_')) {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'messages', id);
-                    await deleteDoc(docRef);
-                } else {
-                    let localMsgs = JSON.parse(localStorage.getItem('farewell_msgs') || '[]');
-                    localMsgs = localMsgs.filter(m => m.id !== id);
-                    localStorage.setItem('farewell_msgs', JSON.stringify(localMsgs));
-                    renderLocalMessages();
-                }
-                showToast("留言已成功刪除 🗑️");
-                if (useFirebase) {
-                    loadAndRenderMessages();
-                }
-            } catch (err) {
-                console.error("Delete failed:", err);
-                showToast("刪除失敗，請重新再試！");
-            }
-        }
-
-        // HTML 安全過濾
-        function escapeHtml(string) {
-            return String(string).replace(/[&<>"']/g, function (s) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#39;'
-                }[s];
-            });
-        }
-
-        // 自定義 Toast
-        function showToast(text) {
-            const toast = document.getElementById('custom-toast');
-            document.getElementById('toast-text').innerText = text;
-            toast.classList.remove('opacity-0', 'translate-y-4');
-            toast.classList.add('opacity-100', 'translate-y-0');
-            
-            setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', 'translate-y-4');
-            }, 3000);
-        }
-
-        // --- 切頁控制 (Expose to global scope for module standard compatibility) ---
+        // [封面頁] 點擊進入
         function triggerPlane() {
             const btn = document.getElementById('plane-btn');
             btn.classList.add('scale-95', 'rotate-6', 'opacity-90');
@@ -700,6 +403,7 @@
             }, 1000);
         }
 
+        // 下一頁
         function nextStep() {
             if (currentStage < stageData.length - 1) {
                 const card = document.getElementById('game-card');
@@ -722,6 +426,7 @@
             renderStage();
         }
 
+        // 回上一頁
         function prevStep() {
             if (currentStage > 0) {
                 const card = document.getElementById('game-card');
@@ -743,18 +448,12 @@
         window.triggerPlane = triggerPlane;
         window.prevStep = prevStep;
         window.clickStoryIcon = clickStoryIcon;
-        window.submitMessage = submitMessage;
-        window.toggleMute = toggleMute;
-        window.handleSignatureClick = handleSignatureClick;
-        window.closePasswordModal = closePasswordModal;
-        window.verifyAdminPassword = verifyAdminPassword;
-        window.closeAdminModal = closeAdminModal;
-        window.deleteMessage = deleteMessage;
+        window.handleBgError = handleBgError;
+        window.handleAvatarError = handleAvatarError;
 
         // --- 視窗載入與初始化 ---
         window.onload = function() {
             lucide.createIcons();
-            initStorage(); // 初始化雲端儲存
             renderStage();
         };
     </script>
